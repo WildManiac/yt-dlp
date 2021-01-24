@@ -202,7 +202,6 @@ class FFmpegPostProcessor(PostProcessor):
                 return mobj.group(1)
         return None
 
-        
     def get_metadata_object(self, path, opts=[]):
         if not self.probe_available:
             raise PostProcessingError('ffprobe/avprobe not found. Please install one.')
