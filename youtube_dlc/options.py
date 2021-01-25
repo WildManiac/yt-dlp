@@ -15,6 +15,7 @@ from .compat import (
 )
 from .utils import (
     expand_path,
+    get_executable_path,
     preferredencoding,
     write_string,
 )
@@ -842,6 +843,10 @@ def parseOpts(overrideArguments=None):
         dest='outtmpl', metavar='TEMPLATE',
         help='Output filename template, see "OUTPUT TEMPLATE" for details')
     filesystem.add_option(
+        '--output-na-placeholder',
+        dest='outtmpl_na_placeholder', metavar='TEXT', default='NA',
+        help=('Placeholder value for unavailable meta fields in output filename template (default: "%default")'))
+    filesystem.add_option(
         '--autonumber-size',
         dest='autonumber_size', metavar='NUMBER', type=int,
         help=optparse.SUPPRESS_HELP)
@@ -996,7 +1001,7 @@ def parseOpts(overrideArguments=None):
     postproc.add_option(
         '-x', '--extract-audio',
         action='store_true', dest='extractaudio', default=False,
-        help='Convert video files to audio-only files (requires ffmpeg or avconv and ffprobe or avprobe)')
+        help='Convert video files to audio-only files (requires ffmpeg/avconv and ffprobe/avprobe)')
     postproc.add_option(
         '--audio-format', metavar='FORMAT', dest='audioformat', default='best',
         help='Specify audio format: "best", "aac", "flac", "mp3", "m4a", "opus", "vorbis", or "wav"; "%default" by default; No effect without -x')
@@ -1214,27 +1219,17 @@ def parseOpts(overrideArguments=None):
                 return
 
             def read_options(path, user=False):
-                func = _readUserConf if user else _readOptions
-                current_path = os.path.join(path, 'yt-dlp.conf')
-                config = func(current_path, default=None)
-                if user:
-                    config, current_path = config
-                if config is None:
-                    current_path = os.path.join(path, 'youtube-dlc.conf')
-                    config = func(current_path, default=None)
+                for package in ('yt-dlp', 'youtube-dlc'):
                     if user:
-                        config, current_path = config
-                if config is None:
-                    return [], None
-                return config, current_path
+                        config, current_path = _readUserConf(package, default=None)
+                    else:
+                        current_path = os.path.join(path, '%s.conf' % package)
+                        config = _readOptions(current_path, default=None)
+                    if config is not None:
+                        return config, current_path
+                return [], None
 
-            def get_portable_path():
-                path = os.path.dirname(sys.argv[0])
-                if os.path.abspath(sys.argv[0]) != os.path.abspath(sys.executable):  # Not packaged
-                    path = os.path.join(path, '..')
-                return os.path.abspath(path)
-
-            configs['portable'], paths['portable'] = read_options(get_portable_path())
+            configs['portable'], paths['portable'] = read_options(get_executable_path())
             if '--ignore-config' in configs['portable']:
                 return
 
