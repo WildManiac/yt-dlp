@@ -206,7 +206,7 @@ class FFmpegPostProcessor(PostProcessor):
     def get_metadata_object(self, path, opts=[]):
         if self.probe_basename != 'ffprobe':
             if self.probe_available:
-                report_warning('Only ffprobe is supported for metadata extraction')
+                self.report_warning('Only ffprobe is supported for metadata extraction')
             raise PostProcessingError('ffprobe not found. Please install.')
         self.check_version()
 
@@ -230,7 +230,7 @@ class FFmpegPostProcessor(PostProcessor):
     def get_stream_number(self, path, keys, value):
         streams = self.get_metadata_object(path)['streams']
         num = next(
-            (i for i, stream in enumerate(streams) if traverse_dict(stream, *keys, casesense=False) == value),
+            (i for i, stream in enumerate(streams) if traverse_dict(stream, keys, casesense=False) == value),
             None)
         return num, len(streams)
 
@@ -583,7 +583,7 @@ class FFmpegMetadataPP(FFmpegPostProcessor):
                 filename, ('tags', 'mimetype'), 'application/json')
             if old_stream is not None:
                 options.extend(['-map', '-0:%d' % old_stream])
-                new_stream -=1
+                new_stream -= 1
 
             options.extend([
                 '-attach', info['__infojson_filepath'],

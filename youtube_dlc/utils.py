@@ -5935,7 +5935,8 @@ def load_plugins(name, type, namespace):
             plugin_info[0].close()
     return classes
 
-def traverse_dict(dictn, *keys, casesense=True):
+
+def traverse_dict(dictn, keys, casesense=True):
     if not isinstance(dictn, dict):
         return None
     first_key = keys[0]
@@ -5943,4 +5944,4 @@ def traverse_dict(dictn, *keys, casesense=True):
         dictn = {key.lower(): val for key, val in dictn.items()}
         first_key = first_key.lower()
     value = dictn.get(first_key, None)
-    return value if len(keys) < 2 else traverse_dict(value, *keys[1:], casesense=casesense)
+    return value if len(keys) < 2 else traverse_dict(value, keys[1:], casesense)

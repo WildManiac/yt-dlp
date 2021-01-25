@@ -102,7 +102,7 @@ class EmbedThumbnailPP(FFmpegPostProcessor):
                 filename, ('tags', 'mimetype'), mimetype)
             if old_stream is not None:
                 options.extend(['-map', '-0:%d' % old_stream])
-                new_stream -=1
+                new_stream -= 1
             options.extend([
                 '-attach', thumbnail_filename,
                 '-metadata:s:%s' % new_stream, 'mimetype=%s' % mimetype,
@@ -119,7 +119,7 @@ class EmbedThumbnailPP(FFmpegPostProcessor):
                     filename, ('disposition', 'attached_pic'), 1)
                 if old_stream is not None:
                     options.extend(['-map', '-0:%d' % old_stream])
-                    new_stream -=1
+                    new_stream -= 1
                 options.extend(['-disposition:%s' % new_stream, 'attached_pic'])
 
                 self.to_screen('Adding thumbnail to "%s"' % filename)
