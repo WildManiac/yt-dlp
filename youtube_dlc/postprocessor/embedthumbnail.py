@@ -83,6 +83,7 @@ class EmbedThumbnailPP(FFmpegPostProcessor):
             # Rename back to unescaped for further processing
             os.rename(encodeFilename(escaped_thumbnail_jpg_filename), encodeFilename(thumbnail_jpg_filename))
             thumbnail_filename = thumbnail_jpg_filename
+            thumbnail_ext = 'jpg'
 
         success = True
         if info['ext'] == 'mp3':

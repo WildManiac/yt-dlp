@@ -203,8 +203,10 @@ class FFmpegPostProcessor(PostProcessor):
         return None
 
     def get_metadata_object(self, path, opts=[]):
-        if not self.probe_available:
-            raise PostProcessingError('ffprobe/avprobe not found. Please install one.')
+        if self.probe_basename != 'ffprobe':
+            if self.probe_available:
+                report_warning('Only ffprobe is supported for metadata extraction')
+            raise PostProcessingError('ffprobe not found. Please install.')
         self.check_version()
 
         cmd = [
@@ -396,7 +398,7 @@ class FFmpegVideoRemuxerPP(FFmpegPostProcessor):
             return [], information
 
         options = ['-c', 'copy', '-map', '0', '-dn']
-        if sourceext in ['mp4', 'm4a', 'mov']:
+        if targetext in ['mp4', 'm4a', 'mov']:
             options.extend(['-movflags', '+faststart'])
         prefix, sep, oldext = path.rpartition('.')
         outpath = prefix + sep + targetext
@@ -568,9 +570,9 @@ class FFmpegMetadataPP(FFmpegPostProcessor):
                 in_filenames.append(metadata_filename)
                 options.extend(['-map_metadata', '1'])
 
-        if '__infojson_filename' in info and (info['ext'] == 'mkv' or info['ext'] == 'mka'):
+        if '__infojson_filepath' in info and (info['ext'] == 'mkv' or info['ext'] == 'mka'):
             options.extend([
-                '-attach', info['__infojson_filename'],
+                '-attach', info['__infojson_filepath'],
                 '-metadata:s:t', 'mimetype=application/json'
             ])
 
